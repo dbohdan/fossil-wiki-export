@@ -1,0 +1,98 @@
+#! /usr/bin/env tclsh
+
+package require Tcl 8.6-10
+package require tcltest
+
+set command [list \
+    [info nameofexecutable] \
+    [file normalize [file dirname [info script]]/../fossil-wiki-export.tcl] \
+]
+
+if {[info exists env(FWE_COMMAND)]} {
+    set command $env(FWE_COMMAND)
+}
+
+proc fossil-wiki-export args {
+    exec {*}$::command {*}$args
+}
+
+proc clean-up dir {
+    cd $dir
+    foreach f {test.fossil test-fossil test-git} {
+        catch {
+            file delete -force $f
+        }
+    }
+}
+
+
+set testDir [file normalize [file dirname [info script]]]
+clean-up $testDir
+
+
+tcltest::test export-1.1 {} -body {
+    cd $testDir
+
+    exec fossil init test.fossil
+    file mkdir test-fossil
+    cd test-fossil
+    exec fossil open ../test.fossil
+
+    exec fossil wiki create --mimetype text/plain {Page: Text} \
+        << {Text test.}
+    exec fossil wiki create --mimetype text/x-fossil-wiki {Page: Wiki} \
+        << {Wiki markup test.}
+    exec fossil wiki create --mimetype text/x-markdown {Page: Markdown} \
+        << {Markdown test.}
+
+    set ::env(FWE_VERBOSE) true
+    fossil-wiki-export ../test.fossil ../test-git wiki 2>@1
+} -match glob -result {*running git commit\
+    --message {wiki(Page: Markdown): create}*}
+
+tcltest::test git-log-1.1 {} -body {
+    cd $testDir/test-git
+    exec git log
+} -match glob -result {*wiki(Page: Markdown):\
+    create*wiki(Page: Wiki): create*wiki(Page: Text): create*}
+
+tcltest::test file-contents-1.1 {} -body {
+    cd $testDir/test-git/wiki
+    set ch [open {Page_ Text.txt}]
+    try {
+        read $ch
+    } finally {
+        close $ch
+    }
+} -match regexp -result {^Text test.\s*}
+
+tcltest::test file-contents-1.2 {} -body {
+    cd $testDir/test-git/wiki
+    set ch [open {Page_ Wiki.wiki}]
+    try {
+        read $ch
+    } finally {
+        close $ch
+    }
+} -match regexp -result {^Wiki markup test.\s*}
+
+tcltest::test file-contents-1.3 {} -body {
+    cd $testDir/test-git/wiki
+    set ch [open {Page_ Markdown.md}]
+    try {
+        read $ch
+    } finally {
+        close $ch
+    }
+} -match regexp -result {^Markdown test.\s*}
+
+
+clean-up $testDir
+
+
+incr failed [expr {$tcltest::numTests(Failed) > 0}]
+tcltest::cleanupTests
+
+if {$failed > 0} {
+    exit 1
+}
