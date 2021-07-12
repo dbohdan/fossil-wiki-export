@@ -4,6 +4,10 @@ Export a Fossil SCM wiki to Git preserving (recreating) the revision history.
 
 This program is the missing exporter for the [wiki feature](https://fossil-scm.org/home/doc/trunk/www/wikitheory.wiki) of Fossil SCM.  It exports every Fossil wiki page to a file in a chosen subdirectory of a new or existing Git repository.  Every wiki page revision becomes a Git commit.  The commits are in correct chronological order (globally, not just by page).  The appropriate author date is set for each commit through `GIT_AUTHOR_DATE`.
 
+## Known bugs and limitations
+
+* Each of the characters `< > : " / \ | ? *` is replaced with `_` in the filename.  This means that the pages `Foo: Bar` and `Foo? Bar` will be exported to the same file.
+
 ## Requirements
 
 * Git v2.x.  The program was tested with v2.25.1.
