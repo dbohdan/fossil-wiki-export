@@ -11,7 +11,7 @@ This program is the missing exporter for the [wiki feature](https://fossil-scm.o
 ## Requirements
 
 * Git 2.x.  The program has been tested with version 2.25.1.
-* Fossil 2.16 or later.  (Earlier versions may work but haven't been tested.)
+* Fossil 2.14.2 or later.  (Earlier versions may work but haven't been tested.)
 * Tcl 8.6 or later.
 
 ## Usage
