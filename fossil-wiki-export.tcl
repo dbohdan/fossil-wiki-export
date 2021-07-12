@@ -59,8 +59,6 @@ namespace eval fossil-wiki-export {
 
             if {$D <= $after} continue
 
-            # Filename logic.
-
             set path $dir/[safe-filename $L][ext $N]
             set ch [open $path wb]
             puts -nonewline $ch [dict get $card text]
@@ -86,7 +84,7 @@ namespace eval fossil-wiki-export {
                 run git add $path
             }
 
-            set ::env(GIT_AUTHOR_DATE) [dict get $card D]
+            set ::env(GIT_AUTHOR_DATE) $D
             set message [string map [list \
                 {$action} $action \
                 {$page} $L \
