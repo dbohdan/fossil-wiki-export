@@ -1,0 +1,14 @@
+name: CI
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install -y fossil git
+    - name: Print versions
+      run: fossil version && git version
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Run tests
+      run: ./tests/fossil-wiki-export.test
