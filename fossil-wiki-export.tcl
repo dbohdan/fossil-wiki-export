@@ -1,5 +1,5 @@
 #! /usr/bin/env tclsh
-# Export a Fossil SCM wiki to Git with the revision history.
+# Export a Fossil SCM wiki to Git preserving the revision history.
 # Copyright (c) 2021 D. Bohdan and contributors.
 # License: MIT.
 
@@ -12,6 +12,7 @@ namespace eval fossil-wiki-export {
         FROM blob
         WHERE regexp('D[^\n]+\nL ', content(uuid));
     }
+    variable version 0.1.0
 
     proc main {repo dest subdir} {
         variable debug
@@ -38,8 +39,22 @@ namespace eval fossil-wiki-export {
         set seen {}
         set template [env FWE_TEMPLATE {wiki($page): $action}]
         dict for {D card} $cards {
+            set N [env FWE_DEFAULT_MIME_TYPE text/x-markdown]
+            if {[dict exists $card N]} {
+                set N [dict get $card N]
+            }
+
+            switch -- $N {
+                text/x-fossil-wiki {
+                    set ext .wiki
+                }
+                text/x-markdown {
+                    set ext .md
+                }
+            }
+
             set L [dict get $card L]
-            set path $dir/[safe-filename $L]
+            set path $dir/[safe-filename $L]$ext
 
             set ch [open $path wb]
             puts -nonewline $ch [dict get $card text]
