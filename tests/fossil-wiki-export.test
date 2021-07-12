@@ -47,7 +47,7 @@ tcltest::test export-1.1 {} -body {
 
     file mkdir ../test-git
     cd ../test-git
-    exec git init
+    exec -ignorestderr -- git init
     exec git config user.name {Test User}
     exec git config user.email test.user@example.com
     cd ..
