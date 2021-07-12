@@ -45,8 +45,16 @@ tcltest::test export-1.1 {} -body {
     exec fossil wiki create --mimetype text/x-markdown {Page: Markdown} \
         << {Markdown test.}
 
+    file mkdir ../test-git
+    cd ../test-git
+    exec git init
+    exec git config user.name {Test User}
+    exec git config user.email test.user@example.com
+    cd ..
+
+    set ::env(FWE_INIT) false
     set ::env(FWE_VERBOSE) true
-    fossil-wiki-export ../test.fossil ../test-git wiki 2>@1
+    fossil-wiki-export test.fossil test-git/ wiki/ 2>@1
 } -match glob -result {*running git commit\
     --message {wiki(Page: Markdown): create}*}
 
