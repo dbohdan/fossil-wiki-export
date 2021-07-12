@@ -26,10 +26,9 @@ Besides the command line arguments, you can customize the behavior of FWE with e
 
 * `FWE_AFTER` (string, default `1900-01-01T00:00:00`) — only export modifications after this timestamp (non-inclusive).
 * `FWE_INIT` (boolean, default true) — run `git init` in the target Git repository path.
-* `FWE_DEBUG` (boolean, default false) — be verbose and print debug information.
 * `FWE_DEFAULT_MIME_TYPE` (string, default `text/x-markdown`) — the MIME type for pages without one in the [card](https://fossil-scm.org/home/doc/trunk/www/fileformat.wiki).  Determines the file extension.
 * `FWE_TEMPLATE` (string, default `wiki($page): $action`) — the commit message template.  `$page` is replaced with the Fossil wiki page name (`L` in the card); `$action`, with "create", "update", or "delete".
-
+* `FWE_VERBOSE` (boolean, default false) — be verbose and print debug information.
 
 ## License
 

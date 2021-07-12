@@ -16,7 +16,7 @@ namespace eval fossil-wiki-export {
 
     proc main {repo dest subdir} {
         variable debug
-        set debug [env FWE_DEBUG false]
+        set debug [env FWE_VERBOSE false]
 
         set uuids [uuids $repo]
         debug [llength $uuids] UUIDs
@@ -137,8 +137,6 @@ namespace eval fossil-wiki-export {
     }
 
     proc wiki-cards {repo uuids} {
-        variable debug
-
         set cards {}
 
         try {
