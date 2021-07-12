@@ -12,7 +12,7 @@ namespace eval fossil-wiki-export {
         FROM blob
         WHERE regexp('D[^\n]+\nL ', content(uuid));
     }
-    variable version 0.1.0
+    variable version 0.2.0
 
     proc main {repo dest subdir} {
         variable debug
@@ -28,13 +28,14 @@ namespace eval fossil-wiki-export {
         }
         unset cardsNoOrder
 
-        set dir [file join $dest $subdir]
+        set dir [file normalize [file join $dest $subdir]]
         file mkdir $dir
         cd $dest
 
         if {[env FWE_INIT true]} {
             run git init
         }
+        run git reset
 
         set after [env FWE_AFTER 1900-01-01T00:00:00]
         set seen {}
@@ -42,34 +43,25 @@ namespace eval fossil-wiki-export {
         dict for {D card} $cards {
             set L [dict get $card L]
 
-            if {[dict exists $seen $L]} {
-                set action update
-            } else {
-                set action create
-                dict set seen $L {}
-            }
-
-            if {$D <= $after} continue
-
-            # Filename logic.
-            set N [env FWE_DEFAULT_MIME_TYPE text/x-markdown]
+            set N text/x-fossil-wiki
             if {[dict exists $card N]} {
                 set N [dict get $card N]
             }
 
-            switch -- $N {
-                text/plain {
-                    set ext .txt
-                }
-                text/x-fossil-wiki {
-                    set ext .wiki
-                }
-                text/x-markdown {
-                    set ext .md
-                }
+            set prevN {}
+            if {[dict exists $seen $L]} {
+                set action update
+                set prevN [dict get $seen $L]
+            } else {
+                set action create
             }
+            dict set seen $L $N
 
-            set path $dir/[safe-filename $L]$ext
+            if {$D <= $after} continue
+
+            # Filename logic.
+
+            set path $dir/[safe-filename $L][ext $N]
             set ch [open $path wb]
             puts -nonewline $ch [dict get $card text]
             close $ch
@@ -87,6 +79,10 @@ namespace eval fossil-wiki-export {
                     return -options $opts $e
                 }
             } else {
+                # Are we changing the extension?
+                if {$prevN ne {} && $prevN ne $N} {
+                    run git rm --force [file rootname $path][ext $prevN]
+                }
                 run git add $path
             }
 
@@ -97,9 +93,7 @@ namespace eval fossil-wiki-export {
             ] $template]
 
             try {
-                run git commit \
-                    --message $message \
-                    $path \
+                run git commit --message $message
             } on error {e opts} {
                 if {![regexp {nothing (to commit|added to commit but\
                               untracked)} $e]} {
@@ -174,6 +168,23 @@ namespace eval fossil-wiki-export {
 
     proc safe-filename filename {
         regsub -all {[<>:"/\\|?*]} $filename _
+    }
+
+    proc ext N {
+        switch -- $N {
+            text/plain {
+                return .txt
+            }
+            text/x-fossil-wiki {
+                return .wiki
+            }
+            text/x-markdown {
+                return .md
+            }
+            default {
+                return {}
+            }
+        }
     }
 
     proc run args {
