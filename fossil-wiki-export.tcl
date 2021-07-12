@@ -58,6 +58,9 @@ namespace eval fossil-wiki-export {
             }
 
             switch -- $N {
+                text/plain {
+                    set ext .txt
+                }
                 text/x-fossil-wiki {
                     set ext .wiki
                 }
