@@ -10,7 +10,7 @@ This program is the missing exporter for the [wiki feature](https://fossil-scm.o
 
 ## Requirements
 
-* Git v2.x.  The program was tested with v2.25.1.
+* Git 2.x.  The program has been tested with version 2.25.1.
 * Fossil 2.16 or later.  (Earlier versions may work but haven't been tested.)
 * Tcl 8.6 or later.
 
@@ -24,6 +24,7 @@ This program is the missing exporter for the [wiki feature](https://fossil-scm.o
 
 Besides the command line arguments, you can customize the behavior of FWE with environment variables.
 
+* `FWE_AFTER` (string, default `1900-01-01T00:00:00`) — only export modifications after this timestamp (non-inclusive).
 * `FWE_INIT` (boolean, default true) — run `git init` in the target Git repository path.
 * `FWE_DEBUG` (boolean, default false) — be verbose and print debug information.
 * `FWE_DEFAULT_MIME_TYPE` (string, default `text/x-markdown`) — the MIME type for pages without one in the [card](https://fossil-scm.org/home/doc/trunk/www/fileformat.wiki).  Determines the file extension.

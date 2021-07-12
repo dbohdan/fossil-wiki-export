@@ -36,9 +36,22 @@ namespace eval fossil-wiki-export {
             run git init
         }
 
+        set after [env FWE_AFTER 1900-01-01T00:00:00]
         set seen {}
         set template [env FWE_TEMPLATE {wiki($page): $action}]
         dict for {D card} $cards {
+            set L [dict get $card L]
+
+            if {[dict exists $seen $L]} {
+                set action update
+            } else {
+                set action create
+                dict set seen $L {}
+            }
+
+            if {$D <= $after} continue
+
+            # Filename logic.
             set N [env FWE_DEFAULT_MIME_TYPE text/x-markdown]
             if {[dict exists $card N]} {
                 set N [dict get $card N]
@@ -53,13 +66,12 @@ namespace eval fossil-wiki-export {
                 }
             }
 
-            set L [dict get $card L]
             set path $dir/[safe-filename $L]$ext
-
             set ch [open $path wb]
             puts -nonewline $ch [dict get $card text]
             close $ch
 
+            # Determine if this is a deletion (blanking).
             if {[regexp {^\s*$} [dict get $card text]]} {
                 try {
                     set action delete
@@ -72,12 +84,6 @@ namespace eval fossil-wiki-export {
                     return -options $opts $e
                 }
             } else {
-                if {[dict exists $seen $L]} {
-                    set action update
-                } else {
-                    set action create
-                    dict set seen $L {}
-                }
                 run git add $path
             }
 
