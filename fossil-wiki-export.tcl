@@ -6,17 +6,17 @@
 package require Tcl 8.6-10
 
 namespace eval fossil-wiki-export {
-    variable debug false
     variable query {
         SELECT uuid
         FROM blob
         WHERE regexp('D[^\n]+\nL ', content(uuid));
     }
+    variable verbose false
     variable version 0.2.0
 
     proc main {repo dest subdir} {
-        variable debug
-        set debug [env FWE_VERBOSE false]
+        variable verbose
+        set verbose [env FWE_VERBOSE false]
 
         set uuids [uuids $repo]
         debug [llength $uuids] UUIDs
@@ -112,9 +112,9 @@ namespace eval fossil-wiki-export {
     }
 
     proc debug args {
-        variable debug
+        variable verbose
 
-        if {$debug} {
+        if {$verbose} {
             puts stderr $args
         }
     }
