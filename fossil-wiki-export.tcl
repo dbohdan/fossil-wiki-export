@@ -1,9 +1,9 @@
 #! /usr/bin/env tclsh
 # Export a Fossil SCM wiki to Git preserving the revision history.
-# Copyright (c) 2021 D. Bohdan and contributors.
+# Copyright (c) 2021, 2024 D. Bohdan and contributors.
 # License: MIT.
 
-package require Tcl 8.6-10
+package require Tcl 8.6 9
 
 namespace eval fossil-wiki-export {
     variable query {
